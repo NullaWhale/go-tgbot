@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	tg "github.com/Syfaro/telegram-bot-api"
+	"io/ioutil"
 	"log"
 	"net/http"
+
+	tg "github.com/Syfaro/telegram-bot-api"
 )
 
 var (
@@ -12,12 +15,18 @@ var (
 	config Config
 )
 
+type FoodRecord struct {
+	Results []struct {
+		Name string
+	}
+}
+
 func main() {
 	config = LoadConfigFile("./config.json")
 	var err error
 	bot, err = tg.NewBotAPI(config.Token)
 	resp := &http.Response{}
-	googleMapsUrl := "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
+	googleMapsURL := "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
 
 	if err != nil {
 		log.Panic(err)
@@ -53,20 +62,27 @@ func main() {
 					sendMessage(chatID, helloMessage, markup)
 				}
 			} else if message.Location != nil {
-				log.Printf("Location -->> %.6f %.6f",
+				messageLocation := fmt.Sprintf("Location -->> %.6f %.6f",
 					message.Location.Latitude, message.Location.Longitude)
-				urlGet := googleMapsUrl +
+				log.Printf(messageLocation)
+				urlGet := googleMapsURL +
 					"location=" + fmt.Sprintf("%.6f,%.6f", message.Location.Latitude,
 					message.Location.Longitude) +
 					"&radius=500" +
-					"&type=food" +
+					"&type=restaurant" +
 					"&key=" + config.GoogleApiKey
 
-				resp, err = http.Get(string(urlGet))
+				resp, _ = http.Get(string(urlGet))
+				data, _ := ioutil.ReadAll(resp.Body)
+				var record FoodRecord
+				err = json.Unmarshal(data, &record)
 				if err != nil {
-					log.Panic(err)
+					log.Println(err)
 				}
-				log.Println(urlGet, "\n", resp.Body)
+				for place := range record.Results {
+					sendMessage(chatID, string(place), nil)
+				}
+				log.Println("asdasd", record.Results)
 			}
 		}
 	}

@@ -1,9 +1,10 @@
 package main
 
 import (
-	tg "github.com/Syfaro/telegram-bot-api"
 	"log"
 	"reflect"
+
+	tg "github.com/Syfaro/telegram-bot-api"
 )
 
 func sendMessage(chatID int64, message string, keyboard interface{}) {
@@ -11,11 +12,10 @@ func sendMessage(chatID int64, message string, keyboard interface{}) {
 	typeOfKeyboard := reflect.TypeOf(keyboard)
 	log.Println(typeOfKeyboard)
 	if typeOfKeyboard == nil {
-		msg.ReplyMarkup = tg.ReplyKeyboardRemove{true, false}
+		bot.Send(msg)
 	} else {
 		switch typeOfKeyboard.String() {
 		default:
-			msg.ReplyMarkup = tg.ReplyKeyboardRemove{true, false}
 			bot.Send(msg)
 		case "tgbotapi.InlineKeyboardMarkup":
 			msg.ReplyMarkup = &keyboard
