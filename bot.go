@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	tg "github.com/Syfaro/telegram-bot-api"
 	"log"
+	"net/http"
 )
 
 var (
@@ -14,6 +16,8 @@ func main() {
 	config = LoadConfigFile("./config.json")
 	var err error
 	bot, err = tg.NewBotAPI(config.Token)
+	resp := &http.Response{}
+	googleMapsUrl := "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
 
 	if err != nil {
 		log.Panic(err)
@@ -27,8 +31,6 @@ func main() {
 	updates, err := bot.GetUpdatesChan(ucfg)
 
 	for update := range updates {
-		log.Println("-->> ", update)
-
 		if update.CallbackQuery != nil {
 			data := update.CallbackQuery.Data
 			message := update.CallbackQuery.Message
@@ -50,6 +52,21 @@ func main() {
 					helloMessage := "Hello, " + userName + ". Do you want to be fat?"
 					sendMessage(chatID, helloMessage, markup)
 				}
+			} else if message.Location != nil {
+				log.Printf("Location -->> %.6f %.6f",
+					message.Location.Latitude, message.Location.Longitude)
+				urlGet := googleMapsUrl +
+					"location=" + fmt.Sprintf("%.6f,%.6f", message.Location.Latitude,
+					message.Location.Longitude) +
+					"&radius=500" +
+					"&type=food" +
+					"&key=" + config.GoogleApiKey
+
+				resp, err = http.Get(string(urlGet))
+				if err != nil {
+					log.Panic(err)
+				}
+				log.Println(urlGet, "\n", resp.Body)
 			}
 		}
 	}

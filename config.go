@@ -7,7 +7,8 @@ import (
 )
 
 type Config struct {
-	Token string `json:"Token"`
+	Token        string `json:"Token"`
+	GoogleApiKey string `json:"GoogleApiKey"`
 }
 
 func LoadConfigFile(file string) Config {
