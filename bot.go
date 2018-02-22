@@ -6,8 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
+	"math/rand"
 	tg "github.com/Syfaro/telegram-bot-api"
+	"time"
 )
 
 var (
@@ -15,9 +16,17 @@ var (
 	config Config
 )
 
+type AddressGeometry struct {
+	Location LatLng `json:"location"`
+}
+type LatLng struct {
+	Lat float64 `json:"lat"`
+	Lng float64 `json:"lng"`
+}
 type FoodRecord struct {
 	Results []struct {
-		Name string
+		Name string `json:"name"`
+		Geometry AddressGeometry `json:"geometry,omitempty"`
 	}
 }
 
@@ -79,10 +88,11 @@ func main() {
 				if err != nil {
 					log.Println(err)
 				}
-				for place := range record.Results {
-					sendMessage(chatID, string(place), nil)
-				}
-				log.Println("asdasd", record.Results)
+				randomize := rand.New(rand.NewSource(time.Now().UnixNano()))
+				randPlace := record.Results[randomize.Intn(len(record.Results))]
+				what := "Покушай в " + randPlace.Name
+				sendMessage(chatID, what, nil)
+				sendLocation(chatID, randPlace.Geometry.Location.Lat, randPlace.Geometry.Location.Lng)
 			}
 		}
 	}

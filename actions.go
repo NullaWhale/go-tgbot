@@ -24,6 +24,11 @@ func sendMessage(chatID int64, message string, keyboard interface{}) {
 	}
 }
 
+func sendLocation(chatID int64, latitude float64, longitude float64) {
+	msg := tg.NewLocation(chatID, latitude, longitude)
+	bot.Send(msg)
+}
+
 func handleCallback(data string, message *tg.Message) {
 	removeKeyboard := tg.NewEditMessageText(
 		message.Chat.ID,
