@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	tg "github.com/Syfaro/telegram-bot-api"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"math/rand"
-	tg "github.com/Syfaro/telegram-bot-api"
+	"net/http"
 	"time"
 )
 
@@ -25,7 +25,7 @@ type LatLng struct {
 }
 type FoodRecord struct {
 	Results []struct {
-		Name string `json:"name"`
+		Name     string          `json:"name"`
 		Geometry AddressGeometry `json:"geometry,omitempty"`
 	}
 }
